@@ -1,5 +1,5 @@
 const {expect} = require('@playwright/test')
-
+const {SEERPORTAL_URI} = process.env
 exports.UserManagement = class UserManagement {
 
     constructor(page) {
@@ -10,6 +10,9 @@ exports.UserManagement = class UserManagement {
         this.passwordInput = '#password'
         this.submitButton='button[type="submit"]'
 
+        //Logout 
+        this.logout_profile="//div[normalize-space()='Cbkc Dataseers']//*[name()='svg']"
+        this.logoutBtn="//li[@title='Logout']"
        // User Management Automating Scripts : -
 
        //1. Navigate to the user management page
@@ -58,6 +61,11 @@ exports.UserManagement = class UserManagement {
 
     async submit() {await this.page.locator(this.submitButton).click()}
 
+    async logout() {
+        await this.page.locator(this.logout_profile).click()
+        await this.page.locator(this.logoutBtn).click()
+    }
+
     async admin(){await this.page.locator(this.menu).click()}
 
     async userMgmt() { await this.page.locator(this.user).click()}
@@ -95,52 +103,50 @@ exports.UserManagement = class UserManagement {
         await expect(selectCard).toHaveText("Please select at least 1 card element in Advance config tab")
         await this.page.locator(this.advanceTab).click()
 
-        // Web Table : On Navigating to the Advance tab : Select the card  
+     // Web Table : On Navigating to the Advance tab : Select the card  
      
        const table = await this.page.locator('#rc-tabs-0-panel-4 table')
        const columns =await table.locator('thead tr th')
-      // console.log('No of columns', await columns.count())
+       console.log('No of columns', await columns.count())
 
-      const rows = await table.locator('tbody tr')
-     // console.log('No of Rows',await rows.count())
+       const rows = await table.locator('tbody tr')
+       console.log('No of Rows',await rows.count())
 
 
-      await SelectCardMenu(rows,this.page,'Transaction monitoring panel')
-      // await SelectCardMenu(rows,this.page,'Metrics')
-      //await SelectCardMenu(rows,this.page,'IdentitySeer')
+    await SelectCardMenu(rows,this.page,'Transaction monitoring panel')
+//       await SelectCardMenu(rows,this.page,'Metrics')
+//       await SelectCardMenu(rows,this.page,'IdentitySeer')
 
-     await this.page.locator(this.handleSubmit).click()
+      await this.page.locator(this.handleSubmit).click()
 
-    //! Validate the Email Address already exists
-    // let email_exist = await this.page.locator(this.emailAlreadyExists)
-    // await expect.soft(email_exist).toHaveText("Email address already exists.")
+//     //! Validate the Email Address already exists
+//     let email_exist = await this.page.locator(this.emailAlreadyExists)
+//     await expect.soft(email_exist).toHaveText("Email address already exists.")
 }
 
    //! After Success : Read Operation : Search Operation
-    //   async search(name){
-    //     await this.page.locator(this.firstName).click()
-    //     await this.page.locator(this.searchInput).fill(name)
-    //     await this.page.locator(this.searchBtn).click()
-    //     this.page.waitForTimeout(2000)
+      async search(name){
+        await this.page.locator(this.firstName).click()
+        await this.page.locator(this.searchInput).fill(name)
+        await this.page.locator(this.searchBtn).click()
+        //  Click on the Reset Button 
+        await this.page.getByTitle("Reset filter").click()
+    }
 
-    //     //  Click on the Reset Button 
-    //     //await this.page.getByTitle("Reset filter").click()
-        
-    //     await this.page.screenshot({ path: 'UserManagement.png', fullPage: true });  
-    // }
-
+    
 //! Download the sample file from the listing page and store it in the file
 // Start waiting for download before clicking
-    async DownloadSample () {
+    async download() {
+            
         const download = await Promise.all([
              this.page.waitForEvent('download'),
              this.page.getByTitle("Download sample file").click()
-
         ])
-         const fileName  = download[0].suggestedFilename()
-         await download[0].saveAs(fileName)
+            let fileName  = download[0].suggestedFilename()
+                await download[0].saveAs(fileName)
+         }
     }
-}
+
 
 // Select one card
 async function SelectCardMenu (rows,page,name){
